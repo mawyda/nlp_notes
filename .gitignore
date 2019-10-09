@@ -5,4 +5,7 @@ requirements.txt
 test_section_one.ipynb  
 UPDATED_NLP_COURSE
 .ipynb_checkpoints/
+venv/
+requirements.txt
+
 
