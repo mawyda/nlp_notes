@@ -21,3 +21,18 @@ for token in doc2:
     print(token.text, token.pos_, token.dep_)
 
 print(doc2)
+# Showing Span
+print(len(doc2)) # Len is the number of tokens.
+
+# Does slicing slice on token or \w characters?
+print(doc2[4:6]) # indices 4 and 5.
+print()
+# Sentences
+doc3 = nlp(u'This is a sentence. The second sent stars here. And a third goes here.')
+for sent in doc3.sents:
+    print(sent)
+
+# and indexing to find the start of sentence:
+print(doc3[5].is_sent_start)
+print(type(doc3.sents))
+

@@ -60,12 +60,110 @@ lemma_ is short for lemmatization, which returns the base form of the word.
 
 Spans
 
+You can slice the doc object to returns spans of test. This is of the tokens, not the individual
+characters of the words themselves.
+There is a Span function that also allows us to create span, but for now we will use the slicing method.
+quote = doc2[5:20]
+type(quote) # spacy.tokens.span.Span
+
+Sentences:
+Certain tokens inside a doc may receive the "start of sentence" tag. This can allow us to generate sentence segments.
+doc2.sents # is attribute and returns an iterable generator
+
+You can test if the token is the start of a sentence with:
+token.is_sent_start attribute.
 
 
+01 - Tokenization:
 
+The first step is to break down the Doc object into component pieces - tokens.
+Q?: Why is the tutorial showing a quoted string?
+'"We're moving to LA!"'
+Does spacy need this to parse up the data? And why were unicode strings being used in the beginning?
 
+# Note: the print() statements end argument in
+print(mystring, end='|') does this add a character to the end of each statement?
+- In a single print() statement, it wou't actually print until something else is printed.
 
+tokens are the basic building blocks of the text. They do not lemmatize or convert to word stems.
+They merely break things up for us at the highest level.
+Notice also that quotation marks and punctuation is captured as well.
 
+Prefixes, Suffixes, and Infixes:
+spaCy will isolate punctuation that does not form an integral part of the word ('re in we're)
+So starting and ending punctuation will be given it's own token.
+Something like the @ in email addresses or part of a numerical value will not be parsed and kept as
+part of the whole token.
+Hyphens in between words may receive their own token, however.
+Even doubleed up punctuation will be tokenized individually.
+
+Units of measure (5km == '5', 'km') or dollar signs will be assigned their own token.
+Times and dollar amounts will not.
+Note that adding pm to 3:30pm token was '3:30pm'. Why didn't this get broken up?
+
+Exceptions:
+Punctuation that exists as apart of a known abbreviation will be preserved.
+So U.S. and St. will be one whole token.
+
+Counting Tokens:
+Doc objects have a set number of tokens, which you can get with len():
+len(doc)
+
+Counting Vocab entries
+You can get this count, which is dependent on the language (model) selected.
+len(doc.vocab)
+
+Tokens can be retrieved by index position and slice:
+doc[4], or a group with
+doc[3:10]
+Does support negative indexing:
+doc[-4:] # Last four.
+
+Tokens cannot be reassigned:
+Although doc objects are lists of tokens, that are not explicitly lists and do not support item reassignment.
+So:
+doc[3] = 'new word' will not work.
+Which makes sense considering all of the attributes assigned to that token when the doc object is created.
+
+Named Entities
+These add another layer of context. The model recognizes that certain words are
+organizational names, money, etc.
+You can access this collection of thing (technically a tuple) through the DocObj's
+ents property:
+doc = nlp(some text)
+doc.ents # returns tuple.
+
+# Notice that the end argument of the print() statement takes place of the
+\n that would print things on the next line.
+
+Named entity recognition (NER) is an important ML tool applied to NLP.
+More to follow.
+
+Noun Chunks:
+noun_chunks are another Doc Obj property.
+These are flat phrases that a noun as their head.
+These can be though of as the noun and the words that describe them.
+# I imagine this is good for sentiment analysis...
+
+You can iterate through these like ents above:
+for chunk in doc.chunks:
+    print(chunk.text)
+
+# Note: text is not necessary, but explicit. Also, there are additional chunk components
+that will be looked at.
+
+Built-in visualizers:
+
+spaCy provides a built-in visualization tool called displaCy. It is
+able to detect f your a re working in a Jupyter Notebook (ie., I think you
+pass that as an argument).
+But if working outside, it will serve up an html page to do so, like:
+displacy.serve(doc, style = n,...)
+The style can be 'dep' for dependency and 'ent' for the entity recognizer.
+spacy.displacy.serve(doc, style = 'ent'
+
+To create the visualizations in a notebook, just use the argument
+jupyter = True
 
 
 
