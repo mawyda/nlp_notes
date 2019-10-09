@@ -1,0 +1,76 @@
+# notes for nlp course
+
+spaCy Basics
+install and setup:
+$ pip isntall -U spacy
+$ python -m spacy download
+
+A few things:
+U.S. is kept together (we call this a token)
+Parts of speech (ex. Proper Noun) are recognized.
+
+In nlp = spacy.load(''), nlp is the model (from the language lib, I believe).
+We applied the model to the text, and named it doc.
+
+There is a processing pipeline that occurs when we apply the model to the text
+to create doc. This can be altered, I believe. But currently there is a
+ tagger, parser, ner. Tokenizer is probably a default portion.
+
+See what's in the pipeline with the pipeline attribute:
+$ nlp.pipeline # Again, nlp is the spacy model
+
+$ nlp.pip_names # Displays just the names, not the objects in memory.
+
+Tokenization:
+# methods/ atts:
+token.text, token.pos_, token.dep_
+
+First step is to break everything up into tokens.
+Periods and large gaps of whitespace are assigned tokens.
+The original text can easily be grabbed by print(doc).
+# doc.__str__() is the text entered
+
+You can also index tokens:
+doc[0]
+
+Parts of speech tagging:
+After splitting into tokens, we tag with parts of speech.
+The proper noun is applied due to some statistical modelling: we assume because
+most things that follow the are nouns.
+
+You can get this for the token with .pos_ att:
+$ token.pos_
+
+Dependencies:
+Syntactic dependencies assigned to each token. The notebook provides a link for
+ a good description of these things.
+
+Found with the dep_ att:
+doc[2].dep_ == ROOT
+
+To see the full name of a tag use the explain() method
+spacy.explain(doc[0].pos_)
+spacy.explain(doc[0].dep_)
+
+# Note that both parts of speech and dependencies are considered tags.
+
+Additional token attributes:
+See the table for more.
+lemma_ is short for lemmatization, which returns the base form of the word.
+
+Spans
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
