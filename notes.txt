@@ -165,6 +165,131 @@ spacy.displacy.serve(doc, style = 'ent'
 To create the visualizations in a notebook, just use the argument
 jupyter = True
 
+02- Stemming
+Sometimes it helps in a search query to return multiple versions of a word.
+Ex. boats, boating, boat.
+The process of stemming may be considered crude, but it truncates letters
+until the root/ word stem is reached. boat|ing
+spaCy doesn't use this process and isntead chooses to rely on lemmatiztion, which we will look
+at later.
+For now, we use nltk.
+
+Porter Stemmer
+One of the most common and effective stemming algorithm developed by Martin Porter.
+Goes through a series of phases to find the word stem, using multiple rules
+$$$
+import nltk # Why import everything?
+from nltk.stem.porter import *
+
+p_stemmer = PorterStemmer()
+words = ['run','runner','running','ran','runs','easily','fairly']
+for word in words:
+    print(word + ' --> ' + p_stemmer.stem(word))
+$$$
+Note that some of the words are returned to unusual roots.
+
+Snowball Stemmer
+Has multiple names, but is a slight improvement on the Porter Stemmer in terms of logic and speed.
+
+from nltk.stem.snowball import SnowballStemmer
+# Language required
+s_stemmer = SnowballStemmer(language='english')
+words = ['run','runner','running','ran','runs','easily','fairly']
+for word in words:
+    print(word + ' --> ' + s_stemmer.stem(word))
+
+# Not a huge difference from the first stemmer in terms of what I would consider accuracy.
+
+# Notes:
+stemmers.stem() works on strings.
+
+Stemming does have it's drawbacks where lemmatization might be an improvement.
+For instance, a word may not be recognized as the correct part of speech:
+phrase = 'I am meeting him tomorrow at the meeting.'
+for word in phrase.split():
+    print(word + ' --> ' + p_stemmer.stem(word))
+# Both meetings will reduce to 'meet', but the latter one should be meeting becuase that is the full noun.
+
+Lemmatization -03
+Looks beyond word reduction and applies a morphological analysis to words.
+This is more than just truncating characters.
+For example, the lemma of 'was' is 'be' and meeting may be meet or meeting depending
+on it's use in a sentence.
+
+# Note: Using spaCy for this stuff. This gets applied to each token.
+Notice the difference between lemma and lemma_.
+
+import spacy
+nlp = spacy.load('en_core_web_sm')
+doc1 = nlp(u"I am a runner running in a race because I love to run since I ran today")
+
+# Notice that 'I' as the lemma_ of -PRON-, instead of a different lemma.
+
+token.lemma
+token.lemma_
+
+Q?: What is the diffrence between the two? Without the underscore, a number is
+returned.
+With lemma_, the root word is returned.
+
+Function to display lemmas
+
+We write a function to display lemmas and other parts of the word.
+Uses the doc as argument. i.e. nlp(text)
+
+def show_lemmas(text):
+    for token in test:
+        # Returns the text, the Part of Speech, the lemma number, and hte lemma itself.
+        print(f'{token.text:{12}} {token.pos_:{6}} {token.lemma:<{22}} {token.lemma_}')
+
+# Note the left-align added to the lemma hash value.
+
+Lemmatization does not reduce words down to their most basic synonym.
+I.e. automobile does not become car.
+
+Lemmatization does not categorize phrases.
+# Not sure what that means or why it is important.
+
+The basic point is that using spaCy's lemma tools, you can get the correct root
+of the word, paying attention even to the token's part of speech.
+
+
+Stop Words - 04:
+Words like 'a' and 'the' that appear so frequently that they do not need to be tagged as
+thoroughly as nouns, verbs and modifiers.
+
+To show these:
+nlp.Defaults.stop_words # type == set.
+
+To check if a word is a stopword:
+nlp.vocab['myself'].is_stop  # == True
+nlp.vocab['mystery'].is_stop # == False
+
+To add a stop word:
+In this example, we want to add 'btw' to the stop words:
+nlp.Defaults.stop_words.add('btw')
+nlp.vocab['btw'],is_stop == True
+# Always add stopwords as lower case.
+
+To remove a stopword:
+nlp.Defaults.stop_words.remove(<string>)
+# Apparently it must also be removed from the lexeme. Why?
+nlp.vocab[<string>].is_stop = False
+
+
+05- Vocabulary and Matching.
+In this section we;ll identify and label specifc phrases that match patterns
+we can define ourselves.
+
+Rule-based Matching
+
+
+
+
+
+
+
+
 
 
 
