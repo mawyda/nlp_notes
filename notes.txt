@@ -1,14 +1,18 @@
 # notes for nlp course
 
+# TODO: Include the beginning notes related to formatted string literals as well as regex stuff.
+
+
 spaCy Basics
 install and setup:
-$ pip isntall -U spacy
+$ pip install -U spacy
 $ python -m spacy download
 
 A few things:
 U.S. is kept together (we call this a token)
 Parts of speech (ex. Proper Noun) are recognized.
 
+$ nlp = spacy.load('en_core_web_sm')
 In nlp = spacy.load(''), nlp is the model (from the language lib, I believe).
 We applied the model to the text, and named it doc.
 
@@ -21,6 +25,7 @@ $ nlp.pipeline # Again, nlp is the spacy model
 
 $ nlp.pip_names # Displays just the names, not the objects in memory.
 
+
 Tokenization:
 # methods/ atts:
 token.text, token.pos_, token.dep_
@@ -28,7 +33,8 @@ token.text, token.pos_, token.dep_
 First step is to break everything up into tokens.
 Periods and large gaps of whitespace are assigned tokens.
 The original text can easily be grabbed by print(doc).
-# doc.__str__() is the text entered
+# doc.__str__() is the text entered. I.e. just printing the token will show
+it's text.
 
 You can also index tokens:
 doc[0]
@@ -36,10 +42,10 @@ doc[0]
 Parts of speech tagging:
 After splitting into tokens, we tag with parts of speech.
 The proper noun is applied due to some statistical modelling: we assume because
-most things that follow the are nouns.
+most things that follow "the" are nouns.
 
 You can get this for the token with .pos_ att:
-$ token.pos_
+$ token.pos_ # Part of speech
 
 Dependencies:
 Syntactic dependencies assigned to each token. The notebook provides a link for
@@ -79,13 +85,16 @@ token.is_sent_start attribute.
 The first step is to break down the Doc object into component pieces - tokens.
 Q?: Why is the tutorial showing a quoted string?
 '"We're moving to LA!"'
-Does spacy need this to parse up the data? And why were unicode strings being used in the beginning?
+-Does spacy need this to parse up the data? And why were unicode strings being
+used in the beginning?
 
 # Note: the print() statements end argument in
 print(mystring, end='|') does this add a character to the end of each statement?
-- In a single print() statement, it wou't actually print until something else is printed.
+- In a single print() statement, it won't actually print until something else
+is printed.
 
-tokens are the basic building blocks of the text. They do not lemmatize or convert to word stems.
+Tokens are the basic building blocks of the text. They do not lemmatize or
+convert to word stems.
 They merely break things up for us at the highest level.
 Notice also that quotation marks and punctuation is captured as well.
 
@@ -95,11 +104,12 @@ So starting and ending punctuation will be given it's own token.
 Something like the @ in email addresses or part of a numerical value will not be parsed and kept as
 part of the whole token.
 Hyphens in between words may receive their own token, however.
-Even doubleed up punctuation will be tokenized individually.
+Even doubled up punctuation will be tokenized individually.
 
 Units of measure (5km == '5', 'km') or dollar signs will be assigned their own token.
 Times and dollar amounts will not.
-Note that adding pm to 3:30pm token was '3:30pm'. Why didn't this get broken up?
+Q?: Note that adding pm to 3:30pm token was '3:30pm'. Why didn't this get
+broken up?
 
 Exceptions:
 Punctuation that exists as apart of a known abbreviation will be preserved.
@@ -110,7 +120,8 @@ Doc objects have a set number of tokens, which you can get with len():
 len(doc)
 
 Counting Vocab entries
-You can get this count, which is dependent on the language (model) selected.
+You can get the count of this, which is dependent on the language (model)
+selected.
 len(doc.vocab)
 
 Tokens can be retrieved by index position and slice:
@@ -123,7 +134,8 @@ Tokens cannot be reassigned:
 Although doc objects are lists of tokens, that are not explicitly lists and do not support item reassignment.
 So:
 doc[3] = 'new word' will not work.
-Which makes sense considering all of the attributes assigned to that token when the doc object is created.
+Which makes sense considering all of the attributes assigned to that token when
+the doc object is created. This would throw off the rest of the schema.
 
 Named Entities
 These add another layer of context. The model recognizes that certain words are
@@ -146,7 +158,7 @@ These can be though of as the noun and the words that describe them.
 # I imagine this is good for sentiment analysis...
 
 You can iterate through these like ents above:
-for chunk in doc.chunks:
+for chunk in doc.noun_chunks:
     print(chunk.text)
 
 # Note: text is not necessary, but explicit. Also, there are additional chunk components
@@ -155,8 +167,8 @@ that will be looked at.
 Built-in visualizers:
 
 spaCy provides a built-in visualization tool called displaCy. It is
-able to detect f your a re working in a Jupyter Notebook (ie., I think you
-pass that as an argument).
+able to detect if you are working in a Jupyter Notebook (ie., by passing an
+argument).
 But if working outside, it will serve up an html page to do so, like:
 displacy.serve(doc, style = n,...)
 The style can be 'dep' for dependency and 'ent' for the entity recognizer.
@@ -165,13 +177,14 @@ spacy.displacy.serve(doc, style = 'ent'
 To create the visualizations in a notebook, just use the argument
 jupyter = True
 
-02- Stemming
+
+02 - Stemming
 Sometimes it helps in a search query to return multiple versions of a word.
 Ex. boats, boating, boat.
 The process of stemming may be considered crude, but it truncates letters
 until the root/ word stem is reached. boat|ing
-spaCy doesn't use this process and isntead chooses to rely on lemmatiztion, which we will look
-at later.
+spaCy doesn't use this process and instead chooses to rely on lemmatiztion,
+which we will look at later.
 For now, we use nltk.
 
 Porter Stemmer
@@ -208,13 +221,14 @@ For instance, a word may not be recognized as the correct part of speech:
 phrase = 'I am meeting him tomorrow at the meeting.'
 for word in phrase.split():
     print(word + ' --> ' + p_stemmer.stem(word))
-# Both meetings will reduce to 'meet', but the latter one should be meeting becuase that is the full noun.
+# Both meetings will reduce to 'meet', but the latter one should be meeting
+because that is the full noun.
 
 Lemmatization -03
 Looks beyond word reduction and applies a morphological analysis to words.
 This is more than just truncating characters.
 For example, the lemma of 'was' is 'be' and meeting may be meet or meeting depending
-on it's use in a sentence.
+on it's use in a sentence).
 
 # Note: Using spaCy for this stuff. This gets applied to each token.
 Notice the difference between lemma and lemma_.
@@ -228,8 +242,8 @@ doc1 = nlp(u"I am a runner running in a race because I love to run since I ran t
 token.lemma
 token.lemma_
 
-Q?: What is the diffrence between the two? Without the underscore, a number is
-returned.
+Q?: What is the difference between the two? Without the underscore, a
+hash number is returned.
 With lemma_, the root word is returned.
 
 Function to display lemmas
@@ -239,7 +253,8 @@ Uses the doc as argument. i.e. nlp(text)
 
 def show_lemmas(text):
     for token in test:
-        # Returns the text, the Part of Speech, the lemma number, and hte lemma itself.
+        # Returns the text, the Part of Speech, the lemma number, and the lemma
+         itself.
         print(f'{token.text:{12}} {token.pos_:{6}} {token.lemma:<{22}} {token.lemma_}')
 
 # Note the left-align added to the lemma hash value.
@@ -255,8 +270,8 @@ of the word, paying attention even to the token's part of speech.
 
 
 Stop Words - 04:
-Words like 'a' and 'the' that appear so frequently that they do not need to be tagged as
-thoroughly as nouns, verbs and modifiers.
+Words like 'a' and 'the' that appear so frequently that they do not need to be
+tagged as thoroughly as nouns, verbs and modifiers.
 
 To show these:
 nlp.Defaults.stop_words # type == set.
