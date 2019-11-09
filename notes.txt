@@ -1,15 +1,26 @@
 # notes for nlp course
 
 # TODO: Include the beginning notes related to formatted string literals as well as regex stuff.
+Introduction to NLP:
+Video tutorial
+For many tasks, spaCy has only one method, and it is typically the most current and efficient algorithm available.
+NLTK is older but less efficient.
+Spacy is better for most use cases, because we ignore implementations/ algorithms.
+Spacy does not have any models for sentiment analysis, which is typically easier to perform with NLTK.
 
+Download and installation:
+You have to pip install and then download the language library.
 
-spaCy Basics
+Lecture 15: What is natural language processing?
+How to get an AI to understand human language.
+
+spaCy Basics (Lecture 16)
 install and setup:
 $ pip install -U spacy
-$ python -m spacy download
+$ python -m spacy download en
 
 A few things:
-U.S. is kept together (we call this a token)
+"U.S.", for example, is kept together (we call this a token).
 Parts of speech (ex. Proper Noun) are recognized.
 
 $ nlp = spacy.load('en_core_web_sm')
@@ -293,10 +304,154 @@ nlp.vocab[<string>].is_stop = False
 
 
 05- Vocabulary and Matching.
-In this section we;ll identify and label specifc phrases that match patterns
+In this section we;ll identify and label specific phrases that match patterns
 we can define ourselves.
 
 Rule-based Matching
+
+spaCy offers a rule-matching tool called Matcher that allows you to build
+a library of token patterns, then match those patterns against a Doc object to return
+a list of found matches.
+You can add multiple patterns to the matcher.
+$ from spacy.matcher import Matcher
+$ matcher = Matcher(nlp.vocab)
+
+Here matcher is an object that pairs to the current Vocab object. We can add an remove specific named matches to matcher
+as needed.
+
+Creating patterns:
+'solar power', for example, might appear as one word or two, with or without a hyphen.
+We can match all three:
+pattern1 = [{'LOWER': 'solarpower'}]
+pattern2 = [{'LOWER': 'solar'}, {'LOWER': 'power'}]
+pattern3 = [{'LOWER': 'solar'}, {'IS_PUNCT': True}, {'LOWER': 'power'}]
+
+matcher.add('SolarPower', None, pattern1, pattern2, pattern3)
+
+# What does LOWER stand for in the matching pattern?
+The 2nd pattern looks for the two words that are adjacent to each other.
+The third looks for one with punctuation inbetween the two words.
+Finally, we pass them in to the matcher object, giving it the name SolarPower,
+and setting callbacks to None (see below).
+
+Applying the matcher to a Doc object
+Do so by passing in the doc to the matcher object:
+$ found = matcher(doc)
+A list of three-tuples is returned, containing the ID for the match, with start & end tokens that map to the span
+doc[start:end]
+
+The match_id is the hash value of the string_ID, so:
+nlp.vocab.strings[match_id] # returns SolarPower
+# Note: this is the name that we applied to this match in the matcher.
+
+Setting pattern options and quantifiers:
+
+You can make token rules optional by passing an 'OP': '*' argument.
+pattern1 = [{'LOWER': 'solarpower'}]
+pattern2 = [{'LOWER': 'solar'}, {'IS_PUNCT': True, 'OP': '*'}, {'LOWER': 'power'}]
+# We now kill the old patterns
+matcher.remove('SolarPower')
+# And add the new set to the matcher.
+matcher.add('SolarPower', None, pattern1, pattern2)
+
+OP	Description
+\!	Negate the pattern, by requiring it to match exactly 0 times
+?	Make the pattern optional, by allowing it to match 0 or 1 times
+\+	Require the pattern to match 1 or more times
+\*	Allow the pattern to match zero or more times
+
+# The above are regex like quantifiers we can use on the patterns.
+# On the pattern above, we are saying there maybe a character between
+# the two words.
+
+Be careful with lemmas!
+You can set the pattern to look for the lemmas of words, but _pos matters too.
+So if you expect the lemma to be x, but the _pos changes that (powered as an adjective is still powered),
+you will not catch everything intended.
+# I'm not actually seeing the same as the book. Both instances are coming through as
+lemma_ == 'power'
+
+You can set the Lemma in the matcher by passing the key as 'LEMMA' (versus 'LOWER').
+
+Other token attributes.
+There are a variety of token attributes we can use to determine matching rules.
+
+Attribute	Description
+`ORTH`	The exact verbatim text of a token
+`LOWER`	The lowercase form of the token text
+`LENGTH`	The length of the token text
+`IS_ALPHA`, `IS_ASCII`, `IS_DIGIT`	Token text consists of alphanumeric characters, ASCII characters, digits
+`IS_LOWER`, `IS_UPPER`, `IS_TITLE`	Token text is in lowercase, uppercase, titlecase
+`IS_PUNCT`, `IS_SPACE`, `IS_STOP`	Token is punctuation, whitespace, stop word
+`LIKE_NUM`, `LIKE_URL`, `LIKE_EMAIL`	Token text resembles a number, URL, email
+`POS`, `TAG`, `DEP`, `LEMMA`, `SHAPE`	The token's simple and extended part-of-speech tag, dependency label, lemma, shape
+`ENT_TYPE`	The token's entity label
+
+Token wildcard:
+You can pass an empty dictionary {} as wildcard to represent any token.
+This pattern will cpature hashtags, for example:
+[{'ORTH': '#'}, {}]
+
+PhraseMatcher:
+
+You can match on terminology lists instead of token patterns. This requires
+making each phrase a doc obj (applying the nlp() object to it), and using a different
+matcher object.
+
+from spacy.matcher import PhraseMatcher
+matcher = PhraseMatcher(nlp.vocab)
+
+phrase_list = ['voodoo economics', 'trickle-down economics']
+# doc-ify these:
+phrase_patterns = [nlp(text) for text in phrase_list]
+# add these to the matcher now:
+matcher.add('VoodooEconomics', None, *phrase_patterns)
+# We name it, not sure what the None is for, and we pass the *args.
+
+# Finally, build a list of matches:
+matches = matcher(doc3)
+
+The above will return a list of three-tuples that contains the the hash, start and end indices.
+
+Viewing Matches:
+You can view matches by passing a greater span to the doc and viewing from there.
+
+Another way is to apply the senticizer to the Doc, then iterate thorugh the sentnces to the match point:
+
+# Build a list of sentences
+sents = [sent for sent in doc3.sents]
+# You can then get the start and end of each sentence.
+sent[0].start, sent[0].end
+# Note, you can use indices that are past the start and end of the sentence.
+# !!! Important !!!
+The indices returned are relative to the doc, not the sentence. So,
+if 20 and 35 are returned, using sents[1][35] will refer to the token in the doc, not the sentence.
+
+# Iterate over the sentence list until the sentence end value exceeds a match start value.
+# A generator would be useful here. For each sentence, for each match, find it's sentence.
+
+#  why didn't this work?
+for match in matches:
+    for sent in sents:
+        if match[1] < sent.end:
+            print(sent)
+            break
+
+for match in matches:
+    for sent in sents:
+        if match[1] < sent.end:
+            print(sent)
+            break
+
+
+
+
+
+
+
+
+
+
 
 
 

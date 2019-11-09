@@ -14,7 +14,8 @@ print()
 
 def show_lemmas(text):
     for token in text:
-        # Returns the text, the Part of Speech, the lemma number, and hte lemma itself.
+        # Returns the text, the Part of Speech, the lemma number, and hte
+        # lemma itself.
         print(f'{token.text:{12}} {token.pos_:{6}} {token.lemma:<{22}} {token.lemma_}')
 
 doc2 = nlp(u"I saw eighteen mice today!")
